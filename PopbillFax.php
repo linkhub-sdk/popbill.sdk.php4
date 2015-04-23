@@ -51,7 +51,7 @@ class FaxService extends PopbillBase {
 		
 		if(empty($FilePaths)) {
 			return new PopbillException('{"code" : -99999999 , "message" : "발신파일 목록이 입력되지 않았습니다."}');
-	}
+		}
 		
 		$RequestForm = array();
 		
@@ -87,9 +87,16 @@ class FaxService extends PopbillBase {
 			return new PopbillException('{"code" : -99999999 , "message" : "확인할 접수번호를 입력하지 않았습니다."}');
     	}
     	$result = $this->executeCURL('/FAX/'.$ReceiptNum, $CorpNum,$UserID);	
-		$FaxState = new FaxState();
-		$FaxState->fromJsonInfo($result[0]);
-		return $FaxState;
+
+		$FaxInfoList = array();
+
+		for($i=0; $i<Count($result); $i++){
+			$FaxInfo = new FaxState();
+			$FaxInfo->fromJsonInfo($result[$i]);
+			$FaxInfoList[$i] = $FaxInfo;
+		}
+		return $FaxInfoList;
+
 
 	}
 	
