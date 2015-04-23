@@ -95,7 +95,7 @@ class MessagingService extends PopbillBase {
     	return $this->SendMessage(MessageType_XMS,$CorpNum,$Sender,$Subject, $Content,$Messages,$ReserveDT,$UserID);
     }
 
-	    /* 장/단문메시지 전송 - 메지시 길이에 따라 단문과 장문을 선택하여 전송합니다.
+	/*  MMS 메시지 전송 - 메지시 길이에 따라 단문과 장문을 선택하여 전송합니다.
     *	$CorpNum => 발송사업자번호
     *	$Sender	=> 동보전송용 발신번호 미기재시 개별메시지 발신번호로 전송. 발신번호가 없는 개별메시지에만 동보처리함.
     *	$Subject => 동보전송용 제목 미기재시 개별메시지 제목으로 전송, 제목이 없는 개별메시지에만 동보처리함.
@@ -106,6 +106,7 @@ class MessagingService extends PopbillBase {
     *		'rcvnm' => 수신자 성명
     *		'msg' => 메시지 내용, 미기재시 동보메시지로 전송함.
     *		'sjt' => 제목, 미기재시 동보 제목으로 전송함.
+    *	$FilePath => 전송파일경로 기재.
 	*	$ReserveDT	=> 예약전송시 예약시간 yyyyMMddHHmmss 형식으로 기재
 	*	$UserID		=> 발신자 팝빌 회원아이디
     */
@@ -136,9 +137,6 @@ class MessagingService extends PopbillBase {
     	
     	return $result->receiptNum;
     }
-
-
-
 
 
     /* 전송메시지 내역 및 전송상태 확인
