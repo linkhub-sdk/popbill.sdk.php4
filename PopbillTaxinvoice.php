@@ -10,7 +10,7 @@
 *
 * http://www.linkhub.co.kr
 * Author : Kim Seongjun (pallet027@gmail.com)
-* Written : 2014-04-15
+* Written : 2015-06-15
 *
 * Thanks for your interest.
 * We welcome any suggestions, feedbacks, blames or anything.
@@ -86,13 +86,14 @@ class TaxinvoiceService extends PopbillBase {
     }
     
     //발행예정
-    function Send($CorpNum,$MgtKeyType,$MgtKey,$Memo = '',$UserID = null) {
+    function Send($CorpNum,$MgtKeyType,$MgtKey,$Memo = '',$EmailSubject = '',$UserID = null) {
     	if(is_null($MgtKey) || empty($MgtKey)) {
     		return new PopbillException('{"code" : -99999999 , "message" : "관리번호가 입력되지 않았습니다."}');
     	}
     	
     	$Request = new MemoRequest();
     	$Request->memo = $Memo;
+    	$Request->emailSubject = $EmailSubject;
     	$postdata = $this->Linkhub->json_encode($Request);
     	
     	return $this->executeCURL('/Taxinvoice/'.$MgtKeyType.'/'.$MgtKey, $CorpNum, $UserID, true,'SEND',$postdata);
@@ -738,6 +739,7 @@ class TaxinvoiceLog {
 
 class MemoRequest {
 	var $memo;
+	var $emailSubject;
 }
 
 class IssueRequest {
