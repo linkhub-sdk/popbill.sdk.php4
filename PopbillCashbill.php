@@ -89,6 +89,28 @@ class CashbillService extends PopbillBase {
       return $this->executeCURL('/Cashbill',$CorpNum,$UserID,true,'REVOKEISSUE',$postdata);
     }
 
+    // 취소현금영수증 임시저장 2018-01-16
+    function RevokeRegister($CorpNum, $mgtKey, $orgConfirmNum, $orgTradeDate, $smssendYN = false, $UserID = null,
+      $isPartCancel = false, $cancelType = null, $supplyCost = null, $tax = null, $serviceFee = null, $totalAmount = null){
+
+      $request = array(
+        'mgtKey' => $mgtKey,
+        'orgConfirmNum' => $orgConfirmNum,
+        'orgTradeDate' => $orgTradeDate,
+        'smssendYN' => $smssendYN,
+        'isPartCancel' => $isPartCancel,
+        'cancelType' => $cancelType,
+        'supplyCost' => $supplyCost,
+        'tax' => $tax,
+        'serviceFee' => $serviceFee,
+        'totalAmount' => $totalAmount,
+      );
+
+      $postdata = $this->Linkhub->json_encode($request);
+      return $this->executeCURL('/Cashbill',$CorpNum,$UserID,true,'REVOKE',$postdata);
+    }
+
+
     //삭제
     function Delete($CorpNum,$MgtKey,$UserID = null) {
     	if(is_null($MgtKey) || empty($MgtKey)) {
