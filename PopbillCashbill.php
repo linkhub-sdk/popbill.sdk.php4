@@ -58,13 +58,35 @@ class CashbillService extends PopbillBase {
     	return $this->executeCURL('/Cashbill',$CorpNum,$UserID,true,null,$postdata);
     }
 
-    // 즉시발행
+    // 즉시발행 2018-01-16
     function RegistIssue($CorpNum, $Cashbill, $Memo, $UserID = null){
       if (!is_null($Memo) || !empty($Memo)) {
         $Cashbill->memo = $Memo;
       }
       $postdata = $this->Linkhub->json_encode($Cashbill);
       return $this->executeCURL('/Cashbill',$CorpNum,$UserID,true,"ISSUE",$postdata);
+    }
+
+    // 취소현금영수증 즉시발행 2018-01-16
+    function RevokeRegistIssue($CorpNum, $mgtKey, $orgConfirmNum, $orgTradeDate, $smssendYN = false, $memo = null,
+      $UserID = null, $isPartCancel = false, $cancelType = null, $supplyCost = null, $tax = null, $serviceFee = null, $totalAmount = null){
+
+      $request = array(
+        'mgtKey' => $mgtKey,
+        'orgConfirmNum' => $orgConfirmNum,
+        'orgTradeDate' => $orgTradeDate,
+        'smssendYN' => $smssendYN,
+        'memo' => $memo,
+        'isPartCancel' => $isPartCancel,
+        'cancelType' => $cancelType,
+        'supplyCost' => $supplyCost,
+        'tax' => $tax,
+        'serviceFee' => $serviceFee,
+        'totalAmount' => $totalAmount,
+      );
+
+      $postdata = $this->Linkhub->json_encode($request);
+      return $this->executeCURL('/Cashbill',$CorpNum,$UserID,true,'REVOKEISSUE',$postdata);
     }
 
     //삭제
@@ -289,6 +311,45 @@ class CashbillService extends PopbillBase {
 
     	return $result->unitCost;
     }
+
+
+    function Search($CorpNum, $DType, $SDate, $EDate, $State = array(), $TradeType = array(), $TradeUsage = array(), $TaxationType = array(), $Page, $PerPage, $Order, $QString){
+      if(is_null($DType) || empty($DType)) {
+        return new PopbillException('{"code" : -99999999 , "message" : "날짜유형이 입력되지 않았습니다."}');
+      }
+      if(is_null($SDate) || empty($SDate)) {
+        return new PopbillException('{"code" : -99999999 , "message" : "시작일자가 입력되지 않았습니다."}');
+      }
+      if(is_null($EDate) || empty($EDate)) {
+        return new PopbillException('{"code" : -99999999 , "message" : "종료일자가 입력되지 않았습니다."}');
+      }
+      $uri = '/Cashbill/Search';
+      $uri .= '?DType='.$DType;
+      $uri .= '&SDate='.$SDate;
+      $uri .= '&EDate='.$EDate;
+      if(!is_null($State) || !empty($State)){
+        $uri .= '&State=' . implode(',',$State);
+      }
+      if(!is_null($TradeType) || !empty($TradeType)){
+        $uri .= '&TradeType=' . implode(',',$TradeType);
+      }
+      if(!is_null($TradeUsage) || !empty($TradeUsage)){
+        $uri .= '&TradeUsage=' . implode(',',$TradeUsage);
+      }
+      if(!is_null($TaxationType) || !empty($TaxationType)){
+        $uri .= '&TaxationType=' . implode(',',$TaxationType);
+      }
+      $uri .= '&Page='.$Page;
+      $uri .= '&PerPage='.$PerPage;
+      $uri .= '&Order='.$Order;
+      if(!is_null($QString) || !empty($QString)){
+        $uri .= '&QString=' . $QString;
+      }
+      $response = $this->executeCURL($uri, $CorpNum, "");
+      $SearchList = new CBSearchResult();
+      $SearchList->fromJsonInfo($response);
+      return $SearchList;
+    }
 }
 
 class Cashbill
@@ -433,5 +494,30 @@ class MemoRequest {
 }
 class IssueRequest {
 	var $memo;
+}
+
+class CBSearchResult {
+  var $code;
+  var $total;
+  var $perPage;
+  var $pageNum;
+  var $pageCount;
+  var $message;
+  var $list;
+  function fromJsonInfo($jsonInfo) {
+    isset($jsonInfo->code ) ? $this->code = $jsonInfo->code : null;
+    isset($jsonInfo->total ) ? $this->total = $jsonInfo->total : null;
+    isset($jsonInfo->perPage ) ? $this->perPage = $jsonInfo->perPage : null;
+    isset($jsonInfo->pageNum ) ? $this->pageNum = $jsonInfo->pageNum : null;
+    isset($jsonInfo->pageCount ) ? $this->pageCount = $jsonInfo->pageCount : null;
+    isset($jsonInfo->message ) ? $this->message = $jsonInfo->message : null;
+    $InfoList = array();
+    for ( $i = 0; $i < Count($jsonInfo->list); $i++ ) {
+      $InfoObj = new CashbillInfo();
+      $InfoObj->fromJsonInfo($jsonInfo->list[$i]);
+      $InfoList[$i] = $InfoObj;
+    }
+    $this->list = $InfoList;
+  }
 }
 ?>
