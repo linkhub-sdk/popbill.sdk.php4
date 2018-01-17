@@ -11,6 +11,8 @@
 * http://www.linkhub.co.kr
 * Author : Kim Seongjun (pallet027@gmail.com)
 * Written : 2014-06-23
+* Contributor : Jeong Yohan (code@linkhub.co.kr)
+* Updated : 2018-01-17
 *
 * Thanks for your interest.
 * We welcome any suggestions, feedbacks, blames or anythings.
@@ -88,6 +90,56 @@ class PopbillBase
 
   	return $this->Linkhub->getPartnerBalance($_Token ,$this->IsTest ? $this->ServiceID_TEST : $this->ServiceID_REAL);
   }
+
+  // 담당자 추가
+  function RegistContact($CorpNum, $ContactInfo, $UserID = null){
+    $postdata = $this->Linkhub->json_encode($ContactInfo);
+    return $this->executeCURL('/IDs/New',$CorpNum,$UserID,true,null,$postdata);
+  }
+
+  // 담당자 목록 조회
+  function ListContact($CorpNum, $UserID =  null){
+    $ContactInfoList = array();
+    $response = $this->executeCURL('/IDs',$CorpNum,$UserID);
+    if(is_a($response,'PopbillException')) return $response;
+
+    for($i=0; $i<Count($response); $i++){
+      $ContactInfo = new ContactInfo();
+      $ContactInfo->fromJsonInfo($response[$i]);
+      $ContactInfoList[$i] = $ContactInfo;
+    }
+    return $ContactInfoList;
+  }
+
+  // 담당자 정보 수정
+  function UpdateContact($CorpNum, $ContactInfo, $UserID){
+    $postdata = $this->Linkhub->json_encode($ContactInfo);
+    $response = $this->executeCURL('/IDs',$CorpNum,$UserID,true,null,$postdata);
+    if(is_a($response,'PopbillException')) return $response;
+
+    return $response;
+  }
+
+  // 회사정보 확인
+  function GetCorpInfo($CorpNum, $UserID = null){
+    $response = $this->executeCURL('/CorpInfo',$CorpNum,$UserID);
+    if(is_a($response,'PopbillException')) return $response;
+
+    $CorpInfo = new CorpInfo();
+    $CorpInfo->fromJsonInfo($response);
+    return $CorpInfo;
+  }
+
+  // 회사정보 수정
+  function UpdateCorpInfo($CorpNum, $CorpInfo, $UserID = null){
+    $postdata = $this->Linkhub->json_encode($CorpInfo);
+    
+    $response = $this->executeCURL('/CorpInfo',$CorpNum,$UserID,true,null,$postdata);
+    if(is_a($response,'PopbillException')) return $response;
+
+    return $response;
+  }
+
 
   /************ 이하 내부 함수 ***************************/
   function getsession_Token($CorpNum) {
@@ -181,6 +233,7 @@ class JoinForm
 	var $PWD;
 }
 
+// 과금정보 클래스
 class ChargeInfo
 {
   var $unitCost;
@@ -193,6 +246,53 @@ class ChargeInfo
     isset($jsonInfo->rateSystem) ? $this->rateSystem = $jsonInfo->rateSystem : null;
   }
 }
+
+// 담당자정보 클래스
+class ContactInfo
+{
+	var $id;
+	var $pwd;
+	var $email;
+	var $hp;
+	var $personName;
+	var $searchAllAllowYN;
+	var $tel;
+	var $fax;
+	var $mgrYN;
+	var $regDT;
+
+  function fromJsonInfo($jsonInfo) {
+		isset($jsonInfo->id ) ? $this->id = $jsonInfo->id : null;
+		isset($jsonInfo->email ) ? $this->email = $jsonInfo->email : null;
+		isset($jsonInfo->hp ) ? $this->hp = $jsonInfo->hp : null;
+		isset($jsonInfo->personName ) ? $this->personName = $jsonInfo->personName : null;
+		isset($jsonInfo->searchAllAllowYN ) ? $this->searchAllAllowYN = $jsonInfo->searchAllAllowYN : null;
+		isset($jsonInfo->tel ) ? $this->tel = $jsonInfo->tel : null;
+		isset($jsonInfo->fax ) ? $this->fax = $jsonInfo->fax : null;
+		isset($jsonInfo->mgrYN ) ? $this->mgrYN = $jsonInfo->mgrYN : null;
+		isset($jsonInfo->regDT ) ? $this->regDT = $jsonInfo->regDT : null;
+	}
+}
+
+// 회사정보 클래스
+
+class CorpInfo
+{
+	var $ceoname;
+	var $corpName;
+	var $addr;
+	var $bizType;
+	var $bizClass;
+	function fromJsonInfo($jsonInfo){
+		isset($jsonInfo->ceoname ) ? $this->ceoname = $jsonInfo->ceoname : null;
+		isset($jsonInfo->corpName ) ? $this->corpName = $jsonInfo->corpName : null;
+		isset($jsonInfo->addr ) ? $this->addr = $jsonInfo->addr : null;
+		isset($jsonInfo->bizType ) ? $this->bizType = $jsonInfo->bizType : null;
+		isset($jsonInfo->bizClass ) ? $this->bizClass = $jsonInfo->bizClass : null;
+	}
+}
+
+
 
 //예외클래스
 class PopbillException
